@@ -1,0 +1,6 @@
+{
+  "name": "Hong Kong MTR Waymap",
+  "description": "An accessible navigation guide and AR camera simulator for Hong Kong MTR, helping wheelchair users, seniors, and travelers find lifts and escalators at station exits.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
