@@ -38,9 +38,9 @@ export default function CameraScanner() {
         setIsScanning(true);
         setScanError(null);
 
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 280, height: 200 } },
+            await scanner.start(
+              { facingMode: "environment" },
+              { fps: 10, qrbox: { width: 280, height: 280 } },
           (decodedText) => {
             // On successful scan
             const result = findExitByBarcode(decodedText);
@@ -123,7 +123,7 @@ export default function CameraScanner() {
             {isScanning && !scanResult && (
               <>
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-52 border-2 border-[#ac2e44]/60 rounded-lg">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-[#ac2e44]/60 rounded-lg">
                     <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#ac2e44] rounded-tl-lg" />
                     <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#ac2e44] rounded-tr-lg" />
                     <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#ac2e44] rounded-bl-lg" />

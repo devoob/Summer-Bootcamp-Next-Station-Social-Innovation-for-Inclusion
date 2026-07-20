@@ -7,7 +7,6 @@ export default function StationOverview() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterWheelchairOnly, setFilterWheelchairOnly] = useState(false);
   const [arStationId, setArStationId] = useState<string | null>(null);
-  const hasSearchOrFilter = searchQuery.trim() || filterWheelchairOnly;
 
   const filteredStations = MTR_STATIONS.filter(station => {
     const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -90,13 +89,6 @@ export default function StationOverview() {
         </div>
       </div>
 
-      {!hasSearchOrFilter ? (
-        <div className="bg-white border border-zinc-200 rounded-xl p-8 text-center">
-          <Search size={36} className="text-zinc-300 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-zinc-700">Search for a station</h3>
-          <p className="text-base text-zinc-500 mt-1">Type a station name above or toggle the wheelchair filter to view results.</p>
-        </div>
-      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {filteredStations.map((station) => {
           const stats = getAccessibilityStats(station);
@@ -220,7 +212,6 @@ export default function StationOverview() {
           </div>
         )}
       </div>
-      )}
 
     </div>
   );
