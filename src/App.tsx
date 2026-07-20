@@ -10,7 +10,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("stations");
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col font-sans" id="app-root">
+    <div className="h-screen bg-zinc-50 text-zinc-900 flex flex-col font-sans overflow-hidden" id="app-root">
 
       <header className="bg-white border-b border-zinc-200 shrink-0 sticky top-0 z-50 shadow-sm pt-[env(safe-area-inset-top)]">
         <div className="max-w-7xl w-full mx-auto">
@@ -53,7 +53,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col min-h-0 max-w-7xl w-full mx-auto px-3 md:px-8 py-4 md:py-8">
+      <main className="flex-1 flex flex-col min-h-0 overflow-y-auto max-w-7xl w-full mx-auto px-3 md:px-8 py-4 md:py-8">
         <div className="relative flex-1 flex flex-col min-h-0">
           <AnimatePresence mode="wait">
             {activeTab === "stations" && (

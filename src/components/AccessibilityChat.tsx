@@ -223,7 +223,7 @@ export default function AccessibilityChat() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm" id="accessibility-chat-panel">
+    <div className="flex-1 flex flex-col bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm" id="accessibility-chat-panel">
       <div className="bg-white px-4 md:px-5 py-4 border-b border-zinc-200 flex flex-col md:flex-row md:justify-between md:items-center gap-3 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded bg-[#ac2e44]/10 flex items-center justify-center text-[#ac2e44] font-bold shrink-0">
