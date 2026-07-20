@@ -137,7 +137,65 @@ export const MTR_STATIONS: MtrStation[] = [
         hasEscalatorToConcourse: true
       }
     ],
-    arRoutes: []
+    arRoutes: [
+      {
+        id: "hku-p1-to-exitA1",
+        from: "Platform 1 (Island Line)",
+        to: "Exit A1 (University Main Gate / Lift)",
+        type: "to_exit",
+        targetExit: "A1",
+        waypoints: [
+          {
+            step: 1,
+            instruction: "Exit the train and walk towards the rear of the platform. Look for the blue 'Lift to Concourse' sign.",
+            chineseInstruction: "落車後步向月台後方，尋找藍色「往大堂升降機」標誌。",
+            direction: "forward",
+            distance: 15,
+            landmark: "Platform 1 Lift Sign"
+          },
+          {
+            step: 2,
+            instruction: "Take the high-speed passenger lift up to the Concourse level (70m ascent).",
+            chineseInstruction: "乘搭高速升降機往大堂 (上升70米)。",
+            direction: "up_elevator",
+            distance: 0,
+            landmark: "High-Speed Platform Lift"
+          },
+          {
+            step: 3,
+            instruction: "Exit the lift on Concourse level and walk straight ahead for 25 meters, following the Exit A1 signs.",
+            chineseInstruction: "在大堂落升降機後直行25米，沿A1出口指示前行。",
+            direction: "forward",
+            distance: 25,
+            landmark: "Concourse Passage"
+          },
+          {
+            step: 4,
+            instruction: "Turn right towards Exit A1 gates. Use the wide ticket gates on the right.",
+            chineseInstruction: "向右轉往A1出口閘口，使用右側的闊閘機。",
+            direction: "right",
+            distance: 10,
+            landmark: "Wide Ticket Gates"
+          },
+          {
+            step: 5,
+            instruction: "Go through the gates and take the street-level lift to reach Pok Fu Lam Road at the University main gate.",
+            chineseInstruction: "出閘後乘搭地面升降機前往薄扶林道香港大學正門。",
+            direction: "up_elevator",
+            distance: 5,
+            landmark: "Exit A1 Street Lift"
+          },
+          {
+            step: 6,
+            instruction: "You have arrived at Pok Fu Lam Road / HKU Main Gate street level safely.",
+            chineseInstruction: "你已安全抵達薄扶林道香港大學正門。",
+            direction: "arrive",
+            distance: 0,
+            landmark: "HKU Main Gate"
+          }
+        ]
+      }
+    ]
   },
   {
     id: "central",
