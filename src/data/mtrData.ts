@@ -86,8 +86,8 @@ export const MTR_STATIONS: MtrStation[] = [
         wheelchairFriendly: false,
         locationDetails: "Escalator access only. No lift. For lift access, use Exits A1, A2, B2, or C1.",
         barcodeId: "HKU-B1",
-        liftLocationHint: "This exit has escalator only. The nearest lift is at Exit B2, about 40m walk towards Queen's College.",
-        alternativeExit: "Use Exit B2 (Queen's College) for the closest lift access with step-free route."
+        liftLocationHint: "This exit has escalator only, no lift. Exit B2 has a lift just 40m away towards Queen's College, opposite McDonald's Hill Road.",
+        alternativeExit: "Use Exit B2 (Queen's College, opposite McDonald's Hill Road) for the closest lift — only 40m walk."
       },
       {
         name: "B2",
@@ -97,8 +97,8 @@ export const MTR_STATIONS: MtrStation[] = [
         chineseDescription: "薄扶林道 / 皇仁書院",
         wheelchairFriendly: true,
         barcodeId: "HKU-B2",
-        liftLocationHint: "The elevator is located about 20m behind this exit near the Queen's College park entrance.",
-        alternativeExit: "Exit A1 at the University main gate also has lift access if this is crowded."
+        liftLocationHint: "The elevator is located about 20m behind this exit near the Queen's College park entrance, across from McDonald's Hill Road.",
+        alternativeExit: "Exit B1 (nearby, opposite McDonald's Hill Road) has no lift. Use this exit B2 for step-free access."
       },
       {
         name: "C1",
