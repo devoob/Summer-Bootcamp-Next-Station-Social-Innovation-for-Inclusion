@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Scan, Navigation, X, MapPin, Accessibility, ArrowRight, QrCode } from "lucide-react";
+import { Scan, Navigation, X, MapPin, Accessibility, ArrowRight, QrCode, Play } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { findExitByBarcode, MtrExit, MtrStation } from "../data/mtrData";
+import { findExitByBarcode, MTR_STATIONS, MtrExit, MtrStation } from "../data/mtrData";
 import ARNavigator from "./ARNavigator";
 
 interface ScanResult {
@@ -40,8 +40,17 @@ export default function CameraScanner() {
   }, []);
 
   const startCamera = async () => {
+    // Timeout fallback for environments without camera
+    const timeoutId = setTimeout(() => {
+      if (!streamRef.current) {
+        setScanError("Could not access camera. Please ensure camera permissions are granted.");
+        setIsScanning(false);
+      }
+    }, 5000);
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      clearTimeout(timeoutId);
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -49,6 +58,7 @@ export default function CameraScanner() {
       setIsScanning(true);
       setScanError(null);
     } catch (err: any) {
+      clearTimeout(timeoutId);
       console.error("Camera error:", err);
       setScanError("Could not access camera. Please ensure camera permissions are granted.");
       setIsScanning(false);
@@ -128,6 +138,22 @@ export default function CameraScanner() {
     setScanResult(null);
   };
 
+  const simulateScan = () => {
+    // Pick a random exit that has barcode data for demo
+    const barcodeExits: { station: MtrStation; exit: MtrExit }[] = [];
+    for (const station of MTR_STATIONS) {
+      for (const exit of station.exits) {
+        if (exit.barcodeId) {
+          barcodeExits.push({ station, exit });
+        }
+      }
+    }
+    if (barcodeExits.length === 0) return;
+    const pick = barcodeExits[Math.floor(Math.random() * barcodeExits.length)];
+    setScanResult(pick);
+    stopCamera();
+  };
+
   const switchMode = (newMode: ScannerMode) => {
     setScanResult(null);
     setScanError(null);
@@ -185,30 +211,7 @@ export default function CameraScanner() {
               <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover" />
             )}
 
-            {/* Scanning overlay */}
-            {!scanResult && !scanError && (
-              <>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-[#ac2e44]/60 rounded-lg">
-                    <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#ac2e44] rounded-tl-lg" />
-                    <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#ac2e44] rounded-tr-lg" />
-                    <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#ac2e44] rounded-bl-lg" />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#ac2e44] rounded-br-lg" />
-                  </div>
-                </div>
-                <div className="absolute bottom-8 left-4 right-4 text-center">
-                  <p className="text-white text-base font-semibold">Point camera at an exit barcode</p>
-                  <p className="text-zinc-400 text-sm mt-1">Barcode scanners are located at station exits</p>
-                </div>
-                {isScanning && (
-                  <div className="absolute top-4 right-4 bg-[#ac2e44]/80 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    Scanning...
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Scanning overlay */}
+            {/* Scanning overlay + demo button */}
             {isScanning && !scanResult && (
               <>
                 <div className="absolute inset-0 pointer-events-none">
@@ -219,9 +222,15 @@ export default function CameraScanner() {
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#ac2e44] rounded-br-lg" />
                   </div>
                 </div>
-                <div className="absolute bottom-8 left-4 right-4 text-center">
-                  <p className="text-white text-base font-semibold">Point camera at an exit barcode</p>
-                  <p className="text-zinc-400 text-sm mt-1">Barcode scanners are located at station exits</p>
+                <div className="absolute bottom-8 left-4 right-4 text-center flex flex-col items-center gap-3">
+                  <div>
+                    <p className="text-white text-base font-semibold">Point camera at an exit barcode</p>
+                    <p className="text-zinc-400 text-sm mt-1">Barcode scanners are located at station exits</p>
+                  </div>
+                  <button onClick={simulateScan}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white text-[#ac2e44] rounded-full text-sm font-semibold shadow-lg hover:bg-zinc-100 transition-all">
+                    <Play size={16} /> Demo Scan
+                  </button>
                 </div>
               </>
             )}
@@ -231,7 +240,11 @@ export default function CameraScanner() {
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-950">
                 <div className="text-center">
                   <Scan size={48} className="text-zinc-600 mx-auto mb-4" />
-                  <p className="text-zinc-400 text-lg">Starting camera...</p>
+                  <p className="text-zinc-400 text-lg mb-4">Starting camera...</p>
+                  <button onClick={simulateScan}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white text-[#ac2e44] rounded-full text-sm font-semibold shadow-lg hover:bg-zinc-100 transition-all mx-auto">
+                    <Play size={16} /> Demo Scan
+                  </button>
                 </div>
               </div>
             )}
@@ -243,10 +256,16 @@ export default function CameraScanner() {
                   <Scan size={48} className="text-amber-400 mx-auto mb-4" />
                   <p className="text-zinc-300 text-lg font-semibold mb-2">Camera unavailable</p>
                   <p className="text-zinc-400 text-base">{scanError}</p>
-                  <button onClick={() => switchMode("ar")}
-                    className="mt-4 px-5 py-2.5 bg-[#ac2e44] text-white rounded-lg text-base font-semibold">
-                    Switch to AR Navigation
-                  </button>
+                  <div className="flex flex-col gap-2 mt-4">
+                    <button onClick={() => switchMode("ar")}
+                      className="px-5 py-2.5 bg-[#ac2e44] text-white rounded-lg text-base font-semibold">
+                      Switch to AR Navigation
+                    </button>
+                    <button onClick={simulateScan}
+                      className="px-5 py-2.5 bg-white text-[#ac2e44] rounded-lg text-base font-semibold border border-[#ac2e44] hover:bg-zinc-50 transition-all">
+                      Demo Scan (No Camera)
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
