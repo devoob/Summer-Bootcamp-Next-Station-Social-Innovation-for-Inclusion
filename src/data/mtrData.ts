@@ -6,6 +6,9 @@ export interface MtrExit {
   chineseDescription: string;
   wheelchairFriendly: boolean;
   locationDetails?: string;
+  barcodeId?: string;
+  liftLocationHint?: string;
+  alternativeExit?: string;
 }
 
 export interface MtrPlatform {
@@ -81,7 +84,10 @@ export const MTR_STATIONS: MtrStation[] = [
         description: "Li Yuen Street East & West / Queen's Road Central",
         chineseDescription: "利源東/西街 / 皇后大道中",
         wheelchairFriendly: false,
-        locationDetails: "Stairs only. Not wheelchair accessible."
+        locationDetails: "Stairs only. Not wheelchair accessible.",
+        barcodeId: "CEN-C",
+        liftLocationHint: "Stairs only. The nearest lift is at Exit A (Bus Terminus), about 100m walk through the concourse.",
+        alternativeExit: "Use Exit A (Connaught Road Central / Bus Terminus) for step-free lift access."
       },
       {
         name: "D1",
@@ -850,7 +856,10 @@ export const MTR_STATIONS: MtrStation[] = [
         description: "Pok Fu Lam Road / Queen Mary Hospital",
         chineseDescription: "薄扶林道 / 瑪麗醫院",
         wheelchairFriendly: false,
-        locationDetails: "Escalator access only. No lift. For lift access, use Exits A1, A2, B2, or C1."
+        locationDetails: "Escalator access only. No lift. For lift access, use Exits A1, A2, B2, or C1.",
+        barcodeId: "HKU-B1",
+        liftLocationHint: "This exit has escalator only. The nearest lift is at Exit B2, about 40m walk towards Queen's College.",
+        alternativeExit: "Use Exit B2 (Queen's College) for the closest lift access with step-free route."
       },
       {
         name: "B2",
@@ -858,7 +867,10 @@ export const MTR_STATIONS: MtrStation[] = [
         hasEscalator: true,
         description: "Pok Fu Lam Road / Queen's College",
         chineseDescription: "薄扶林道 / 皇仁書院",
-        wheelchairFriendly: true
+        wheelchairFriendly: true,
+        barcodeId: "HKU-B2",
+        liftLocationHint: "The elevator is located about 20m behind this exit near the Queen's College park entrance.",
+        alternativeExit: "Exit A1 at the University main gate also has lift access if this is crowded."
       },
       {
         name: "C1",
@@ -875,7 +887,10 @@ export const MTR_STATIONS: MtrStation[] = [
         description: "St. John's College / Bonham Road",
         chineseDescription: "聖約翰學院 / 般咸道",
         wheelchairFriendly: false,
-        locationDetails: "Escalator access only. No lift. Use Exit C1 for lift access nearby."
+        locationDetails: "Escalator access only. No lift. Use Exit C1 for lift access nearby.",
+        barcodeId: "HKU-C2",
+        liftLocationHint: "Escalator only. The nearest lift is at Exit C1, about 30m towards Bonham Road.",
+        alternativeExit: "Use Exit C1 (Bonham Road) for the closest lift access."
       }
     ],
     platforms: [
@@ -951,3 +966,14 @@ export const MTR_STATIONS: MtrStation[] = [
     arRoutes: []
   }
 ];
+
+export function findExitByBarcode(barcodeId: string): { station: MtrStation; exit: MtrExit } | null {
+  for (const station of MTR_STATIONS) {
+    for (const exit of station.exits) {
+      if (exit.barcodeId === barcodeId) {
+        return { station, exit };
+      }
+    }
+  }
+  return null;
+}
