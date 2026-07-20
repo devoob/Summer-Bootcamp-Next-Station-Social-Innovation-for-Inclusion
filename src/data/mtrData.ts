@@ -52,6 +52,94 @@ export interface MtrStation {
 
 export const MTR_STATIONS: MtrStation[] = [
   {
+    id: "hku",
+    name: "HKU",
+    chineseName: "香港大學",
+    lines: ["Island Line"],
+    color: "bg-blue-600",
+    textColor: "text-white",
+    exits: [
+      {
+        name: "A1",
+        hasLift: true,
+        hasEscalator: true,
+        description: "Pok Fu Lam Road / The University of Hong Kong",
+        chineseDescription: "薄扶林道 / 香港大學",
+        wheelchairFriendly: true,
+        locationDetails: "High-speed lift connects concourse directly to street level at the University main gate."
+      },
+      {
+        name: "A2",
+        hasLift: true,
+        hasEscalator: true,
+        description: "Pok Fu Lam Road / Hill Road",
+        chineseDescription: "薄扶林道 / 山道",
+        wheelchairFriendly: true,
+        locationDetails: "Lift access to Pok Fu Lam Road near the HKU sports centre."
+      },
+      {
+        name: "B1",
+        hasLift: false,
+        hasEscalator: true,
+        description: "Pok Fu Lam Road / Queen Mary Hospital",
+        chineseDescription: "薄扶林道 / 瑪麗醫院",
+        wheelchairFriendly: false,
+        locationDetails: "Escalator access only. No lift. For lift access, use Exits A1, A2, B2, or C1.",
+        barcodeId: "HKU-B1",
+        liftLocationHint: "This exit has escalator only. The nearest lift is at Exit B2, about 40m walk towards Queen's College.",
+        alternativeExit: "Use Exit B2 (Queen's College) for the closest lift access with step-free route."
+      },
+      {
+        name: "B2",
+        hasLift: true,
+        hasEscalator: true,
+        description: "Pok Fu Lam Road / Queen's College",
+        chineseDescription: "薄扶林道 / 皇仁書院",
+        wheelchairFriendly: true,
+        barcodeId: "HKU-B2",
+        liftLocationHint: "The elevator is located about 20m behind this exit near the Queen's College park entrance.",
+        alternativeExit: "Exit A1 at the University main gate also has lift access if this is crowded."
+      },
+      {
+        name: "C1",
+        hasLift: true,
+        hasEscalator: true,
+        description: "Bonham Road / Pok Fu Lam Road",
+        chineseDescription: "般咸道 / 薄扶林道",
+        wheelchairFriendly: true
+      },
+      {
+        name: "C2",
+        hasLift: false,
+        hasEscalator: true,
+        description: "St. John's College / Bonham Road",
+        chineseDescription: "聖約翰學院 / 般咸道",
+        wheelchairFriendly: false,
+        locationDetails: "Escalator access only. No lift. Use Exit C1 for lift access nearby.",
+        barcodeId: "HKU-C2",
+        liftLocationHint: "Escalator only. The nearest lift is at Exit C1, about 30m towards Bonham Road.",
+        alternativeExit: "Use Exit C1 (Bonham Road) for the closest lift access."
+      }
+    ],
+    platforms: [
+      {
+        name: "Platform 1",
+        line: "Island Line",
+        destination: "Chai Wan",
+        hasLiftToConcourse: true,
+        hasEscalatorToConcourse: true
+      },
+      {
+        name: "Platform 2",
+        line: "Island Line",
+        destination: "Kennedy Town",
+        hasLiftToConcourse: true,
+        hasEscalatorToConcourse: true
+      }
+    ],
+    arRoutes: []
+  },
+  {
     id: "central",
     name: "Central",
     chineseName: "中環",
@@ -822,94 +910,6 @@ export const MTR_STATIONS: MtrStation[] = [
         ]
       }
     ]
-  },
-  {
-    id: "hku",
-    name: "HKU",
-    chineseName: "香港大學",
-    lines: ["Island Line"],
-    color: "bg-blue-600",
-    textColor: "text-white",
-    exits: [
-      {
-        name: "A1",
-        hasLift: true,
-        hasEscalator: true,
-        description: "Pok Fu Lam Road / The University of Hong Kong",
-        chineseDescription: "薄扶林道 / 香港大學",
-        wheelchairFriendly: true,
-        locationDetails: "High-speed lift connects concourse directly to street level at the University main gate."
-      },
-      {
-        name: "A2",
-        hasLift: true,
-        hasEscalator: true,
-        description: "Pok Fu Lam Road / Hill Road",
-        chineseDescription: "薄扶林道 / 山道",
-        wheelchairFriendly: true,
-        locationDetails: "Lift access to Pok Fu Lam Road near the HKU sports centre."
-      },
-      {
-        name: "B1",
-        hasLift: false,
-        hasEscalator: true,
-        description: "Pok Fu Lam Road / Queen Mary Hospital",
-        chineseDescription: "薄扶林道 / 瑪麗醫院",
-        wheelchairFriendly: false,
-        locationDetails: "Escalator access only. No lift. For lift access, use Exits A1, A2, B2, or C1.",
-        barcodeId: "HKU-B1",
-        liftLocationHint: "This exit has escalator only. The nearest lift is at Exit B2, about 40m walk towards Queen's College.",
-        alternativeExit: "Use Exit B2 (Queen's College) for the closest lift access with step-free route."
-      },
-      {
-        name: "B2",
-        hasLift: true,
-        hasEscalator: true,
-        description: "Pok Fu Lam Road / Queen's College",
-        chineseDescription: "薄扶林道 / 皇仁書院",
-        wheelchairFriendly: true,
-        barcodeId: "HKU-B2",
-        liftLocationHint: "The elevator is located about 20m behind this exit near the Queen's College park entrance.",
-        alternativeExit: "Exit A1 at the University main gate also has lift access if this is crowded."
-      },
-      {
-        name: "C1",
-        hasLift: true,
-        hasEscalator: true,
-        description: "Bonham Road / Pok Fu Lam Road",
-        chineseDescription: "般咸道 / 薄扶林道",
-        wheelchairFriendly: true
-      },
-      {
-        name: "C2",
-        hasLift: false,
-        hasEscalator: true,
-        description: "St. John's College / Bonham Road",
-        chineseDescription: "聖約翰學院 / 般咸道",
-        wheelchairFriendly: false,
-        locationDetails: "Escalator access only. No lift. Use Exit C1 for lift access nearby.",
-        barcodeId: "HKU-C2",
-        liftLocationHint: "Escalator only. The nearest lift is at Exit C1, about 30m towards Bonham Road.",
-        alternativeExit: "Use Exit C1 (Bonham Road) for the closest lift access."
-      }
-    ],
-    platforms: [
-      {
-        name: "Platform 1",
-        line: "Island Line",
-        destination: "Chai Wan",
-        hasLiftToConcourse: true,
-        hasEscalatorToConcourse: true
-      },
-      {
-        name: "Platform 2",
-        line: "Island Line",
-        destination: "Kennedy Town",
-        hasLiftToConcourse: true,
-        hasEscalatorToConcourse: true
-      }
-    ],
-    arRoutes: []
   },
   {
     id: "kennedytown",

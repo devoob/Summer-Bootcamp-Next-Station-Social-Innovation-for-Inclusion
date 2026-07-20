@@ -8,7 +8,7 @@ interface ARNavigatorProps {
 
 type LocalizationPhase = "localizing" | "positioned" | "navigating";
 
-export default function ARNavigator({ initialStationId = "central" }: ARNavigatorProps) {
+export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorProps) {
   const [selectedStation, setSelectedStation] = useState<MtrStation>(
     MTR_STATIONS.find(s => s.id === initialStationId) || MTR_STATIONS[0]
   );

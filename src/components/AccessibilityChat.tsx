@@ -94,10 +94,10 @@ export default function AccessibilityChat() {
 
   const PRESETS = [
     {
-      label: "Central Lifts",
+      label: "HKU Lifts",
       icon: <MapPin size={16} />,
-      query: "Which exits at Central station have passenger elevators to street level?",
-      answer: "Central Station (Central) Accessibility\n\nExits with Passenger Lift (wheelchair accessible):\n- Exit A: Connaught Road Central / Bus Terminus\n- Exit G: Landmark / Queen's Road Central (via mall lift)\n- Exit H: Hang Seng Bank Headquarters / Des Voeux Road Central (via building lift)\n- Exit K: Statue Square / Prince's Building (via building lift)\n\nExits with Escalator Only (not wheelchair friendly):\n- Exit B: World-Wide House / Des Voeux Road Central\n- Exit J: Chater Garden / Supreme Court\n- Exit L1 / L2: Landmark / Pedder Street\n\nExits with Stairs Only (not recommended for accessibility):\n- Exit C: Li Yuen Street East & West\n- Exit D1: Pedder Street\n- Exit D2: Theatre Lane\n- Exit E: Edinburgh Building\n- Exit F: Chater Road\n\nTip: For wheelchair access, use Exit A (bus terminus / street level), Exit G (Landmark mall), Exit H (Hang Seng Bank), or Exit K (Prince's Building)."
+      query: "Which exits at HKU station have passenger elevators?",
+      answer: "HKU Station (Hong Kong University) Accessibility\n\nExits with Passenger Lift (wheelchair accessible):\n- Exit A1: Pok Fu Lam Road / The University of Hong Kong -- High-speed lift directly to street level.\n- Exit A2: Pok Fu Lam Road / Hill Road -- Lift access near HKU sports centre.\n- Exit B2: Pok Fu Lam Road / Queen's College -- Lift near the park entrance.\n- Exit C1: Bonham Road / Pok Fu Lam Road -- Lift access.\n\nExits with Escalator Only (not wheelchair friendly):\n- Exit B1: Pok Fu Lam Road / Queen Mary Hospital (use Exit B2 for lift nearby)\n- Exit C2: St. John's College / Bonham Road (use Exit C1 for lift nearby)\n\nTip: HKU station is a modern station with lifts at 4 of 6 exits. Use Exit A1 for the University main gate or Exit B2 for Queen's College area. Barcode scanners at each exit provide detailed lift location info."
     },
     {
       label: "Mong Kok Wheelchair",
