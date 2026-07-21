@@ -11,7 +11,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
   return (
-    <div className="h-screen bg-zinc-50 text-zinc-900 flex flex-col font-sans overflow-hidden" id="app-root">
+    <div className="h-dvh bg-zinc-50 text-zinc-900 flex flex-col font-sans overflow-hidden" id="app-root">
 
       {/* Top Header */}
       <header className="bg-white border-b border-zinc-200 shrink-0 pt-[env(safe-area-inset-top)]">
