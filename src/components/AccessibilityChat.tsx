@@ -237,7 +237,7 @@ export default function AccessibilityChat() {
 
         <div className="flex items-center gap-2">
           {voiceActive ? (
-            <button onClick={stopSpeaking} className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 text-base font-medium">
+            <button onClick={stopSpeaking} className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-orange-100 border border-orange-300 text-orange-800 text-base font-medium">
               <VolumeX size={18} /> Stop
             </button>
           ) : (
@@ -254,31 +254,31 @@ export default function AccessibilityChat() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-5 space-y-4 bg-zinc-50">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-4 bg-zinc-50">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex gap-3 max-w-[90%] md:max-w-[80%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}>
-            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full shrink-0 flex items-center justify-center border-2 text-base font-bold ${
+          <div key={msg.id} className={`flex gap-2 sm:gap-3 max-w-[96%] md:max-w-[80%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}>
+            <div className={`hidden sm:flex w-10 h-10 md:w-12 md:h-12 rounded-full shrink-0 items-center justify-center border-2 text-base font-bold ${
               msg.role === "user" ? "bg-zinc-200 border-zinc-300 text-zinc-500" : "bg-white border-[#ac2e44]"
             }`}>
               {msg.role === "user" ? <User size={18} /> : <img src="/HK_MTR_logo.svg" alt="MTR" className="w-7 h-7" />}
             </div>
 
-            <div className="flex flex-col gap-1">
-              <div className={`p-5 rounded-2xl text-lg shadow-sm ${
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <div className={`p-3.5 sm:p-4 md:p-5 rounded-2xl text-base md:text-lg shadow-sm ${
                 msg.role === "user" ? "bg-[#ac2e44] text-white rounded-tr-none" : "bg-white border border-zinc-200 text-zinc-900 rounded-tl-none"
               }`}>
                 {renderMessageContent(msg.content, msg.role === "user")}
 
                 {msg.sources && msg.sources.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-zinc-200">
-                    <div className="flex items-center gap-1 text-base font-semibold text-zinc-500 mb-2">
+                  <div className="mt-3 pt-3 sm:mt-4 sm:pt-4 border-t border-zinc-200">
+                    <div className="flex items-center gap-1 text-sm sm:text-base font-semibold text-zinc-500 mb-2">
                       <Globe size={16} className="text-[#ac2e44]" /> Sources
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {msg.sources.map((source, sIdx) => (
                         <a key={sIdx} href={source.uri} target="_blank" rel="noreferrer"
-                          className="flex items-center gap-1 px-4 py-2 rounded-lg bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 text-base text-zinc-700 transition-all">
-                          <span className="truncate max-w-[200px]">{source.title}</span>
+                          className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 text-xs sm:text-base text-zinc-700 transition-all">
+                          <span className="truncate max-w-[150px] sm:max-w-[200px]">{source.title}</span>
                           <ExternalLink size={14} className="shrink-0 text-zinc-400" />
                         </a>
                       ))}
@@ -291,12 +291,12 @@ export default function AccessibilityChat() {
         ))}
 
         {loading && (
-          <div className="flex gap-3 max-w-[80%] mr-auto">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-[#ac2e44] flex items-center justify-center overflow-hidden">
+          <div className="flex gap-2 sm:gap-3 max-w-[96%] md:max-w-[80%] mr-auto">
+            <div className="hidden sm:flex w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-[#ac2e44] items-center justify-center overflow-hidden shrink-0">
               <img src="/HK_MTR_logo.svg" alt="MTR" className="w-7 h-7" />
             </div>
-            <div className="p-5 bg-white border border-zinc-200 rounded-2xl rounded-tl-none text-lg text-zinc-500 flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-[#ac2e44] animate-bounce [animation-delay:-0.3s]" />
+            <div className="p-3.5 sm:p-5 bg-white border border-zinc-200 rounded-2xl rounded-tl-none text-base md:text-lg text-zinc-500 flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ac2e44] animate-bounce [animation-delay:-0.3s]" />
               <span className="w-3 h-3 rounded-full bg-[#ac2e44] animate-bounce [animation-delay:-0.15s]" />
               <span className="w-3 h-3 rounded-full bg-[#ac2e44] animate-bounce" />
               <span className="ml-2 font-medium">Searching...</span>

@@ -44,7 +44,7 @@ export default function StationOverview() {
       <div className="space-y-4">
         <button
           onClick={() => setArStationId(null)}
-          className="flex items-center gap-2 text-[#ac2e44] text-base md:text-lg font-semibold hover:underline py-2"
+          className="flex items-center gap-2 text-blue-600 text-base md:text-lg font-semibold hover:underline py-2"
         >
           <ArrowLeft size={22} />
           Back to Stations
@@ -79,13 +79,15 @@ export default function StationOverview() {
         </label>
       </div>
 
-      <div className="bg-[#ac2e44]/5 border border-[#ac2e44]/20 rounded-xl p-4 flex flex-row items-center gap-3">
-        <div className="w-12 h-12 rounded-lg bg-[#ac2e44] flex items-center justify-center text-white shrink-0">
+      <div className="bg-blue-600/5 border border-blue-600/20 rounded-xl p-4 flex flex-row items-center gap-3">
+        <div className="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0">
           <Navigation size={24} />
         </div>
         <div>
-          <h3 className="text-base md:text-lg font-semibold text-zinc-900">Indoor AR Navigation</h3>
-          <p className="text-sm md:text-base text-zinc-600">Tap <strong>"Start AR Navigation"</strong> on any station card to view step-free indoor routes with a live camera overlay.</p>
+          <h3 className="text-base md:text-lg font-semibold text-zinc-900">Find Lift Exit — Street AR</h3>
+          <p className="text-sm md:text-base text-zinc-600">
+            Tap <strong>"Find Lift Exit"</strong> on any station card for street-level walking directions to the nearest exit with a passenger lift. No stairs or slopes.
+          </p>
         </div>
       </div>
 
@@ -127,7 +129,7 @@ export default function StationOverview() {
                   <div className="w-full h-4 bg-zinc-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        stats.percentage > 70 ? "bg-green-500" : stats.percentage > 40 ? "bg-amber-500" : "bg-[#ac2e44]"
+                        stats.percentage > 70 ? "bg-blue-500" : stats.percentage > 40 ? "bg-orange-500" : "bg-[#ac2e44]"
                       }`}
                       style={{ width: `${stats.percentage}%` }}
                     />
@@ -140,9 +142,9 @@ export default function StationOverview() {
                     {station.exits.map((exit, idx) => (
                       <div key={idx} className={`p-4 rounded-lg border text-base md:text-lg ${
                         exit.hasLift
-                          ? "bg-green-50 border-green-200"
+                          ? "bg-blue-50 border-blue-200"
                           : exit.hasEscalator
-                          ? "bg-amber-50 border-amber-200"
+                          ? "bg-orange-50 border-orange-200"
                           : "bg-white border-zinc-200"
                       }`}>
                         <div className="flex flex-col gap-1.5">
@@ -153,12 +155,12 @@ export default function StationOverview() {
                               {exit.name}
                             </span>
                             {exit.hasLift && (
-                              <span className="text-xs md:text-sm px-2.5 py-1.5 rounded bg-green-200 text-green-800 font-semibold flex items-center gap-1 whitespace-nowrap">
+                              <span className="text-xs md:text-sm px-2.5 py-1.5 rounded bg-blue-200 text-blue-800 font-semibold flex items-center gap-1 whitespace-nowrap">
                                 <Accessibility size={14} /> LIFT
                               </span>
                             )}
                             {exit.hasEscalator && !exit.hasLift && (
-                              <span className="text-xs md:text-sm px-2.5 py-1.5 rounded bg-amber-200 text-amber-800 font-semibold whitespace-nowrap">
+                              <span className="text-xs md:text-sm px-2.5 py-1.5 rounded bg-orange-200 text-orange-800 font-semibold whitespace-nowrap">
                                 ESCALATOR
                               </span>
                             )}
@@ -176,10 +178,10 @@ export default function StationOverview() {
                 </div>
 
                 {station.id === "mongkok" && (
-                  <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg flex items-start gap-3 text-base md:text-lg">
-                    <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
+                  <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg flex items-start gap-3 text-base md:text-lg">
+                    <ShieldAlert size={20} className="text-orange-500 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold text-amber-800 block mb-0.5">Staff-Assisted Wheelchair Lift (Exit E1):</span>
+                      <span className="font-bold text-orange-800 block mb-0.5">Staff-Assisted Wheelchair Lift (Exit E1):</span>
                       <span className="text-zinc-700">Exit E1 features a wheelchair stair platform. Please alert the MTR staff using the concourse intercom or call 2881-8888 beforehand for deployment.</span>
                     </div>
                   </div>
@@ -191,12 +193,18 @@ export default function StationOverview() {
                   <MapPin size={18} /> {station.arRoutes.length} AR route{station.arRoutes.length !== 1 ? 's' : ''} mapped
                 </div>
 
-                <button
-                  onClick={() => setArStationId(station.id)}
-                  className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base md:text-lg font-semibold bg-[#ac2e44] hover:bg-red-800 text-white transition-all shadow-sm"
-                >
-                  Start AR Navigation <Navigation size={20} />
-                </button>
+                <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                  {station.externalRoutes.length > 0 ? (
+                    <button
+                      onClick={() => setArStationId(station.id)}
+                      className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base md:text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm"
+                    >
+                      <Navigation size={20} /> Find Lift Exit
+                    </button>
+                  ) : (
+                    <span className="text-base text-zinc-400 italic py-3">All exits at this station have lifts.</span>
+                  )}
+                </div>
               </div>
             </div>
           );

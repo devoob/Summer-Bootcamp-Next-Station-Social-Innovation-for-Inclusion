@@ -38,6 +38,26 @@ export interface ARRoute {
   waypoints: ARWaypoint[];
 }
 
+export interface ExternalWaypoint {
+  step: number;
+  instruction: string;
+  chineseInstruction: string;
+  direction: 'walk_forward' | 'walk_left' | 'walk_right' | 'cross_road' | 'enter_station' | 'arrive';
+  distance: number;
+  landmark?: string;
+}
+
+export interface ExternalARRoute {
+  id: string;
+  fromExit: string;
+  fromDescription: string;
+  toExit: string;
+  toDescription: string;
+  toHasLift: boolean;
+  distance: number;
+  waypoints: ExternalWaypoint[];
+}
+
 export interface MtrStation {
   id: string;
   name: string;
@@ -48,6 +68,7 @@ export interface MtrStation {
   exits: MtrExit[];
   platforms: MtrPlatform[];
   arRoutes: ARRoute[];
+  externalRoutes: ExternalARRoute[];
 }
 
 export const MTR_STATIONS: MtrStation[] = [
@@ -193,6 +214,37 @@ export const MTR_STATIONS: MtrStation[] = [
             distance: 0,
             landmark: "HKU Main Gate"
           }
+        ]
+      }
+    ],
+    externalRoutes: [
+      {
+        id: "hku-b1-to-b2",
+        fromExit: "B1",
+        fromDescription: "Exit B1 (Pok Fu Lam Road / Queen Mary Hospital - Escalator only)",
+        toExit: "B2",
+        toDescription: "Exit B2 (Pok Fu Lam Road / Queen's College - Has Lift)",
+        toHasLift: true,
+        distance: 40,
+        waypoints: [
+          { step: 1, instruction: "From Exit B1, walk south along Pok Fu Lam Road towards Queen's College.", chineseInstruction: "從B1出口沿薄扶林道向南行，往皇仁書院方向。", direction: "walk_forward", distance: 25, landmark: "Pok Fu Lam Road" },
+          { step: 2, instruction: "Cross the street at the pedestrian crossing near McDonald's Hill Road.", chineseInstruction: "在近麥當勞山道的位置使用行人過路處橫過馬路。", direction: "cross_road", distance: 0, landmark: "McDonald's Hill Road Crossing" },
+          { step: 3, instruction: "Continue walking south for 15 meters to Exit B2, located near Queen's College entrance.", chineseInstruction: "繼續向南行15米到達皇仁書院入口旁的B2出口。", direction: "walk_forward", distance: 15, landmark: "Queen's College" },
+          { step: 4, instruction: "You have arrived at Exit B2. Take the passenger lift here for step-free street access.", chineseInstruction: "已抵達B2出口，此處有升降機提供無障礙通道。", direction: "arrive", distance: 0, landmark: "Exit B2 Lift" }
+        ]
+      },
+      {
+        id: "hku-c2-to-c1",
+        fromExit: "C2",
+        fromDescription: "Exit C2 (St. John's College / Bonham Road - Escalator only)",
+        toExit: "C1",
+        toDescription: "Exit C1 (Bonham Road / Pok Fu Lam Road - Has Lift)",
+        toHasLift: true,
+        distance: 30,
+        waypoints: [
+          { step: 1, instruction: "From Exit C2, walk east along Bonham Road towards the Bonham Road / Pok Fu Lam Road junction.", chineseInstruction: "從C2出口沿般咸道向東行，前往般咸道與薄扶林道交界。", direction: "walk_forward", distance: 25, landmark: "Bonham Road" },
+          { step: 2, instruction: "Exit C1 is located on the corner. Enter and take the lift to street level.", chineseInstruction: "C1出口位於交界處，進入後乘搭升降機前往地面。", direction: "enter_station", distance: 5, landmark: "Exit C1 Entrance" },
+          { step: 3, instruction: "You have arrived at Exit C1 with step-free lift access.", chineseInstruction: "已抵達C1出口，備有升降機無障礙設施。", direction: "arrive", distance: 0, landmark: "Exit C1 Lift" }
         ]
       }
     ]
@@ -401,6 +453,84 @@ export const MTR_STATIONS: MtrStation[] = [
             distance: 0,
             landmark: "Connaught Road Central"
           }
+        ]
+      }
+    ],
+    externalRoutes: [
+      {
+        id: "cen-c-to-a",
+        fromExit: "C",
+        fromDescription: "Exit C (Li Yuen Street / Queen's Road Central - Stairs only)",
+        toExit: "A",
+        toDescription: "Exit A (Connaught Road Central / Bus Terminus - Has Lift)",
+        toHasLift: true,
+        distance: 100,
+        waypoints: [
+          { step: 1, instruction: "From Exit C on Queen's Road Central, walk north along Li Yuen Street East towards Des Voeux Road Central.", chineseInstruction: "從皇后大道中的C出口沿利源東街向北行，往德輔道中方向。", direction: "walk_forward", distance: 30, landmark: "Li Yuen Street East" },
+          { step: 2, instruction: "Continue straight across Des Voeux Road Central onto Pedder Street.", chineseInstruction: "直行橫過德輔道中，進入畢打街。", direction: "walk_forward", distance: 40, landmark: "Pedder Street" },
+          { step: 3, instruction: "Cross Connaught Road Central at the pedestrian crossing.", chineseInstruction: "在行人過路處橫過干諾道中。", direction: "cross_road", distance: 0, landmark: "Connaught Road Crossing" },
+          { step: 4, instruction: "Exit A entrance is on the left. Enter and take the lift for step-free access.", chineseInstruction: "A出口入口在左方，進入後乘搭升降機。", direction: "enter_station", distance: 30, landmark: "Exit A Entrance" },
+          { step: 5, instruction: "You have arrived at Exit A with passenger lift access to all levels.", chineseInstruction: "已抵達A出口，備有升降機連接各層。", direction: "arrive", distance: 0, landmark: "Exit A Lift" }
+        ]
+      },
+      {
+        id: "cen-b-to-a",
+        fromExit: "B",
+        fromDescription: "Exit B (World-Wide House / Des Voeux Road Central - Escalator only)",
+        toExit: "A",
+        toDescription: "Exit A (Connaught Road Central / Bus Terminus - Has Lift)",
+        toHasLift: true,
+        distance: 80,
+        waypoints: [
+          { step: 1, instruction: "From Exit B at World-Wide House, walk west along Des Voeux Road Central towards Pedder Street.", chineseInstruction: "從環球大廈B出口沿德輔道中西行，往畢打街方向。", direction: "walk_forward", distance: 50, landmark: "Des Voeux Road Central" },
+          { step: 2, instruction: "Turn right onto Pedder Street and walk north towards Connaught Road Central.", chineseInstruction: "右轉入畢打街向北行，往干諾道中方向。", direction: "walk_right", distance: 20, landmark: "Pedder Street" },
+          { step: 3, instruction: "Cross Connaught Road Central at the pedestrian crossing.", chineseInstruction: "在行人過路處橫過干諾道中。", direction: "cross_road", distance: 0, landmark: "Connaught Road Crossing" },
+          { step: 4, instruction: "Exit A entrance is ahead. Enter and take the lift.", chineseInstruction: "前方為A出口入口，進入後乘搭升降機。", direction: "enter_station", distance: 10, landmark: "Exit A Entrance" },
+          { step: 5, instruction: "You have arrived at Exit A with step-free lift access.", chineseInstruction: "已抵達A出口，備有升降機無障礙設施。", direction: "arrive", distance: 0, landmark: "Exit A Lift" }
+        ]
+      },
+      {
+        id: "cen-d1-to-a",
+        fromExit: "D1",
+        fromDescription: "Exit D1 (Pedder Street / Queen's Road Central - Stairs only)",
+        toExit: "A",
+        toDescription: "Exit A (Connaught Road Central / Bus Terminus - Has Lift)",
+        toHasLift: true,
+        distance: 120,
+        waypoints: [
+          { step: 1, instruction: "From Exit D1 at Pedder Street, walk north along Pedder Street towards Des Voeux Road Central.", chineseInstruction: "從畢打街D1出口沿畢打街向北行，往德輔道中方向。", direction: "walk_forward", distance: 50, landmark: "Pedder Street" },
+          { step: 2, instruction: "Continue straight across Des Voeux Road Central, following Pedder Street towards Connaught Road Central.", chineseInstruction: "直行橫過德輔道中，沿畢打街繼續往干諾道中。", direction: "walk_forward", distance: 40, landmark: "Upper Pedder Street" },
+          { step: 3, instruction: "Cross Connaught Road Central at the pedestrian crossing.", chineseInstruction: "在行人過路處橫過干諾道中。", direction: "cross_road", distance: 0, landmark: "Connaught Road Crossing" },
+          { step: 4, instruction: "Exit A entrance is on the left. Enter and take the lift.", chineseInstruction: "A出口入口在左方，進入後乘搭升降機。", direction: "enter_station", distance: 30, landmark: "Exit A Entrance" },
+          { step: 5, instruction: "You have arrived at Exit A with step-free lift access.", chineseInstruction: "已抵達A出口，備有升降機無障礙設施。", direction: "arrive", distance: 0, landmark: "Exit A Lift" }
+        ]
+      },
+      {
+        id: "cen-j-to-k",
+        fromExit: "J",
+        fromDescription: "Exit J (Chater Garden / Supreme Court - Escalator only)",
+        toExit: "K",
+        toDescription: "Exit K (Statue Square / Prince's Building - Has Lift)",
+        toHasLift: true,
+        distance: 50,
+        waypoints: [
+          { step: 1, instruction: "From Exit J at Chater Garden, walk east through the garden towards Statue Square.", chineseInstruction: "從遮打花園J出口向東步行穿過花園，往皇后像廣場方向。", direction: "walk_forward", distance: 40, landmark: "Chater Garden" },
+          { step: 2, instruction: "Exit K is inside Prince's Building at Statue Square. Enter and use the lift.", chineseInstruction: "K出口位於皇后像廣場太子大廈內，進入後使用升降機。", direction: "enter_station", distance: 10, landmark: "Prince's Building" },
+          { step: 3, instruction: "You have arrived at Exit K with lift access.", chineseInstruction: "已抵達K出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit K Lift" }
+        ]
+      },
+      {
+        id: "cen-l-to-g",
+        fromExit: "L1 / L2",
+        fromDescription: "Exit L1/L2 (Landmark / Pedder Street - Escalator only)",
+        toExit: "G",
+        toDescription: "Exit G (Landmark / Queen's Road Central - Has Lift)",
+        toHasLift: true,
+        distance: 60,
+        waypoints: [
+          { step: 1, instruction: "From Exit L1/L2 at Landmark, walk through the Landmark shopping atrium towards Queen's Road Central.", chineseInstruction: "從置地廣場L1/L2出口穿過置地廣場中庭，往皇后大道中方向。", direction: "walk_forward", distance: 50, landmark: "Landmark Atrium" },
+          { step: 2, instruction: "Exit G is inside Landmark with a passenger lift. Enter and use the lift for step-free access.", chineseInstruction: "G出口位於置地廣場內，備有升降機。進入後使用升降機。", direction: "enter_station", distance: 10, landmark: "Exit G Lift" },
+          { step: 3, instruction: "You have arrived at Exit G with lift access.", chineseInstruction: "已抵達G出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit G Lift" }
         ]
       }
     ]
@@ -632,6 +762,70 @@ export const MTR_STATIONS: MtrStation[] = [
           }
         ]
       }
+    ],
+    externalRoutes: [
+      {
+        id: "mok-b1-to-c3",
+        fromExit: "B1",
+        fromDescription: "Exit B1 (Sai Yeung Choi Street South - Escalator only)",
+        toExit: "C3",
+        toDescription: "Exit C3 (Langham Place Mall Lift - Has Lift)",
+        toHasLift: true,
+        distance: 100,
+        waypoints: [
+          { step: 1, instruction: "From Exit B1 on Sai Yeung Choi Street South, walk north towards Argyle Street.", chineseInstruction: "從西洋菜南街B1出口向北行，往亞皆老街方向。", direction: "walk_forward", distance: 60, landmark: "Sai Yeung Choi Street" },
+          { step: 2, instruction: "Turn right onto Argyle Street and walk east towards Langham Place.", chineseInstruction: "右轉入亞皆老街向東行，往朗豪坊方向。", direction: "walk_right", distance: 30, landmark: "Argyle Street" },
+          { step: 3, instruction: "Enter Langham Place through the main entrance on Argyle Street.", chineseInstruction: "從亞皆老街正門進入朗豪坊。", direction: "enter_station", distance: 10, landmark: "Langham Place Entrance" },
+          { step: 4, instruction: "Take the mall lift in the main atrium down to Basement 2 to reach Exit C3.", chineseInstruction: "乘搭中庭商場升降機到地庫2層到達C3出口。", direction: "enter_station", distance: 0, landmark: "Langham Place Atrium" },
+          { step: 5, instruction: "You have arrived at Exit C3 with lift access from Langham Place.", chineseInstruction: "已抵達C3出口，可經朗豪坊升降機直達。", direction: "arrive", distance: 0, landmark: "Exit C3 Lift" }
+        ]
+      },
+      {
+        id: "mok-e2-to-c3",
+        fromExit: "E2",
+        fromDescription: "Exit E2 (Nathan Road / Dundas Street - Escalator only)",
+        toExit: "C3",
+        toDescription: "Exit C3 (Langham Place Mall Lift - Has Lift)",
+        toHasLift: true,
+        distance: 120,
+        waypoints: [
+          { step: 1, instruction: "From Exit E2 on Nathan Road, walk north along Nathan Road towards Argyle Street.", chineseInstruction: "從彌敦道E2出口沿彌敦道向北行，往亞皆老街方向。", direction: "walk_forward", distance: 80, landmark: "Nathan Road" },
+          { step: 2, instruction: "Turn left onto Argyle Street and walk west towards Langham Place.", chineseInstruction: "左轉入亞皆老街向西行，往朗豪坊方向。", direction: "walk_left", distance: 30, landmark: "Argyle Street" },
+          { step: 3, instruction: "Enter Langham Place through the main entrance.", chineseInstruction: "進入朗豪坊正門。", direction: "enter_station", distance: 10, landmark: "Langham Place Entrance" },
+          { step: 4, instruction: "Take the mall lift down to Basement 2 to reach Exit C3.", chineseInstruction: "乘搭商場升降機到地庫2層到達C3出口。", direction: "enter_station", distance: 0, landmark: "Langham Place Lift" },
+          { step: 5, instruction: "You have arrived at Exit C3 with step-free lift access.", chineseInstruction: "已抵達C3出口，備有無障礙升降機設施。", direction: "arrive", distance: 0, landmark: "Exit C3 Lift" }
+        ]
+      },
+      {
+        id: "mok-a1-to-c3",
+        fromExit: "A1",
+        fromDescription: "Exit A1 (Lok Man Sun Chuen / Mong Kok Road - Escalator only)",
+        toExit: "C3",
+        toDescription: "Exit C3 (Langham Place Mall Lift - Has Lift)",
+        toHasLift: true,
+        distance: 150,
+        waypoints: [
+          { step: 1, instruction: "From Exit A1 on Mong Kok Road, walk south along Nathan Road.", chineseInstruction: "從旺角道A1出口沿彌敦道向南行。", direction: "walk_forward", distance: 100, landmark: "Nathan Road" },
+          { step: 2, instruction: "Turn right onto Argyle Street and walk west towards Langham Place.", chineseInstruction: "右轉入亞皆老街向西行，往朗豪坊方向。", direction: "walk_right", distance: 40, landmark: "Argyle Street" },
+          { step: 3, instruction: "Enter Langham Place and take the mall lift to Basement 2 Exit C3.", chineseInstruction: "進入朗豪坊，乘搭商場升降機到地庫2層C3出口。", direction: "enter_station", distance: 10, landmark: "Langham Place" },
+          { step: 4, instruction: "You have arrived at Exit C3 with lift access.", chineseInstruction: "已抵達C3出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit C3 Lift" }
+        ]
+      },
+      {
+        id: "mok-d1-to-c3",
+        fromExit: "D1",
+        fromDescription: "Exit D1 (Argyle Street / Sai Yeung Choi Street South - Escalator only)",
+        toExit: "C3",
+        toDescription: "Exit C3 (Langham Place Mall Lift - Has Lift)",
+        toHasLift: true,
+        distance: 80,
+        waypoints: [
+          { step: 1, instruction: "From Exit D1 at Argyle Street and Sai Yeung Choi, walk west along Argyle Street towards Langham Place.", chineseInstruction: "從亞皆老街D1出口沿亞皆老街向西行，往朗豪坊方向。", direction: "walk_forward", distance: 70, landmark: "Argyle Street" },
+          { step: 2, instruction: "Enter Langham Place through the main entrance on Argyle Street.", chineseInstruction: "從亞皆老街正門進入朗豪坊。", direction: "enter_station", distance: 10, landmark: "Langham Place Entrance" },
+          { step: 3, instruction: "Take the mall lift down to Basement 2 to reach Exit C3.", chineseInstruction: "乘搭商場升降機到地庫2層到達C3出口。", direction: "enter_station", distance: 0, landmark: "Langham Place Lift" },
+          { step: 4, instruction: "You have arrived at Exit C3 with lift access.", chineseInstruction: "已抵達C3出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit C3 Lift" }
+        ]
+      }
     ]
   },
   {
@@ -797,6 +991,68 @@ export const MTR_STATIONS: MtrStation[] = [
             distance: 0,
             landmark: "Rodney Street Street Level"
           }
+        ]
+      }
+    ],
+    externalRoutes: [
+      {
+        id: "adm-a-to-e",
+        fromExit: "A",
+        fromDescription: "Exit A (Admiralty Centre / Bus Terminus - Stairs only)",
+        toExit: "E",
+        toDescription: "Exit E (Rodney Street / Tamar Park - Has Lift)",
+        toHasLift: true,
+        distance: 100,
+        waypoints: [
+          { step: 1, instruction: "From Exit A at Admiralty Centre, walk east along Queensway towards Rodney Street.", chineseInstruction: "從金鐘中心A出口沿金鐘道向東行，往樂禮街方向。", direction: "walk_forward", distance: 70, landmark: "Queensway" },
+          { step: 2, instruction: "Turn right onto Rodney Street. Exit E entrance is on the right side.", chineseInstruction: "右轉入樂禮街，E出口入口在右方。", direction: "walk_right", distance: 25, landmark: "Rodney Street" },
+          { step: 3, instruction: "Enter Exit E and take the passenger lift for step-free access.", chineseInstruction: "進入E出口，乘搭升降機。", direction: "enter_station", distance: 5, landmark: "Exit E Entrance" },
+          { step: 4, instruction: "You have arrived at Exit E with lift access to Tamar Park and streets.", chineseInstruction: "已抵達E出口，備有升降機前往添馬公園及街道。", direction: "arrive", distance: 0, landmark: "Exit E Lift" }
+        ]
+      },
+      {
+        id: "adm-b-to-e",
+        fromExit: "B",
+        fromDescription: "Exit B (Drake Street / Lippo Centre - Stairs only)",
+        toExit: "E",
+        toDescription: "Exit E (Rodney Street / Tamar Park - Has Lift)",
+        toHasLift: true,
+        distance: 80,
+        waypoints: [
+          { step: 1, instruction: "From Exit B at Lippo Centre on Drake Street, walk east along Drake Street towards Rodney Street.", chineseInstruction: "從力寶中心B出口沿德立街向東行，往樂禮街方向。", direction: "walk_forward", distance: 50, landmark: "Drake Street" },
+          { step: 2, instruction: "Turn left onto Rodney Street. Exit E entrance is ahead.", chineseInstruction: "左轉入樂禮街，E出口入口在前方。", direction: "walk_left", distance: 25, landmark: "Rodney Street" },
+          { step: 3, instruction: "Enter Exit E and take the passenger lift.", chineseInstruction: "進入E出口，乘搭升降機。", direction: "enter_station", distance: 5, landmark: "Exit E Entrance" },
+          { step: 4, instruction: "You have arrived at Exit E with step-free lift access.", chineseInstruction: "已抵達E出口，備有無障礙升降機。", direction: "arrive", distance: 0, landmark: "Exit E Lift" }
+        ]
+      },
+      {
+        id: "adm-c1-to-e",
+        fromExit: "C1",
+        fromDescription: "Exit C1 (Queensway Plaza / Queensway - Stairs only)",
+        toExit: "E",
+        toDescription: "Exit E (Rodney Street / Tamar Park - Has Lift)",
+        toHasLift: true,
+        distance: 120,
+        waypoints: [
+          { step: 1, instruction: "From Exit C1 at Queensway Plaza, walk east along Queensway, past Pacific Place.", chineseInstruction: "從金鐘廊C1出口沿金鐘道向東行，經過太古廣場。", direction: "walk_forward", distance: 90, landmark: "Queensway" },
+          { step: 2, instruction: "Turn right onto Rodney Street. Exit E entrance is on the right.", chineseInstruction: "右轉入樂禮街，E出口入口在右方。", direction: "walk_right", distance: 25, landmark: "Rodney Street" },
+          { step: 3, instruction: "Enter Exit E and take the lift.", chineseInstruction: "進入E出口，乘搭升降機。", direction: "enter_station", distance: 5, landmark: "Exit E Lift" },
+          { step: 4, instruction: "You have arrived at Exit E with lift access.", chineseInstruction: "已抵達E出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit E Lift" }
+        ]
+      },
+      {
+        id: "adm-d-to-e",
+        fromExit: "D",
+        fromDescription: "Exit D (Pacific Place - Stairs to concourse, mall lift available)",
+        toExit: "E",
+        toDescription: "Exit E (Rodney Street / Tamar Park - Has Lift)",
+        toHasLift: true,
+        distance: 60,
+        waypoints: [
+          { step: 1, instruction: "From Exit D at Pacific Place, exit the mall onto Queensway and walk east.", chineseInstruction: "從太古廣場D出口出商場到金鐘道向東行。", direction: "walk_forward", distance: 40, landmark: "Queensway" },
+          { step: 2, instruction: "Turn right onto Rodney Street. Exit E entrance is ahead.", chineseInstruction: "右轉入樂禮街，E出口入口在前方。", direction: "walk_right", distance: 15, landmark: "Rodney Street" },
+          { step: 3, instruction: "Enter Exit E and take the lift to street level.", chineseInstruction: "進入E出口，乘搭升降機往地面。", direction: "enter_station", distance: 5, landmark: "Exit E Lift" },
+          { step: 4, instruction: "You have arrived at Exit E with lift access.", chineseInstruction: "已抵達E出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit E Lift" }
         ]
       }
     ]
@@ -967,6 +1223,69 @@ export const MTR_STATIONS: MtrStation[] = [
           }
         ]
       }
+    ],
+    externalRoutes: [
+      {
+        id: "tst-a2-to-a1",
+        fromExit: "A2",
+        fromDescription: "Exit A2 (Kowloon Park / Haiphong Road South - Escalator only)",
+        toExit: "A1",
+        toDescription: "Exit A1 (Kowloon Park / Haiphong Road - Has Lift)",
+        toHasLift: true,
+        distance: 60,
+        waypoints: [
+          { step: 1, instruction: "From Exit A2 on Haiphong Road, walk north along the park side of Haiphong Road towards Kowloon Park Drive.", chineseInstruction: "從海防道A2出口沿海防道公園側向北行，往九龍公園徑方向。", direction: "walk_forward", distance: 50, landmark: "Haiphong Road" },
+          { step: 2, instruction: "Exit A1 entrance is on the left near the junction. Enter and use the lift.", chineseInstruction: "A1出口入口在左方交界處，進入後使用升降機。", direction: "enter_station", distance: 10, landmark: "Exit A1 Entrance" },
+          { step: 3, instruction: "You have arrived at Exit A1 with step-free lift access.", chineseInstruction: "已抵達A1出口，備有無障礙升降機。", direction: "arrive", distance: 0, landmark: "Exit A1 Lift" }
+        ]
+      },
+      {
+        id: "tst-b1-to-a1",
+        fromExit: "B1",
+        fromDescription: "Exit B1 (Cameron Road / The ONE - Escalator only)",
+        toExit: "A1",
+        toDescription: "Exit A1 (Kowloon Park / Haiphong Road - Has Lift)",
+        toHasLift: true,
+        distance: 100,
+        waypoints: [
+          { step: 1, instruction: "From Exit B1 on Cameron Road, walk west towards Nathan Road.", chineseInstruction: "從金馬倫道B1出口向西行，往彌敦道方向。", direction: "walk_forward", distance: 40, landmark: "Cameron Road" },
+          { step: 2, instruction: "Turn right onto Nathan Road and walk north.", chineseInstruction: "右轉入彌敦道向北行。", direction: "walk_right", distance: 30, landmark: "Nathan Road" },
+          { step: 3, instruction: "Turn left onto Haiphong Road and walk west towards Kowloon Park.", chineseInstruction: "左轉入海防道向西行，往九龍公園方向。", direction: "walk_left", distance: 25, landmark: "Haiphong Road" },
+          { step: 4, instruction: "Exit A1 entrance is on the right. Enter and use the lift.", chineseInstruction: "A1出口入口在右方，進入後使用升降機。", direction: "enter_station", distance: 5, landmark: "Exit A1 Entrance" },
+          { step: 5, instruction: "You have arrived at Exit A1 with lift access.", chineseInstruction: "已抵達A1出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit A1 Lift" }
+        ]
+      },
+      {
+        id: "tst-c1-to-h",
+        fromExit: "C1",
+        fromDescription: "Exit C1 (Peking Road / Chungking Mansions - Escalator only)",
+        toExit: "H",
+        toDescription: "Exit H (iSQUARE Mall Lift - Has Lift)",
+        toHasLift: true,
+        distance: 80,
+        waypoints: [
+          { step: 1, instruction: "From Exit C1 on Peking Road, walk east towards Nathan Road.", chineseInstruction: "從北京道C1出口向東行，往彌敦道方向。", direction: "walk_forward", distance: 40, landmark: "Peking Road" },
+          { step: 2, instruction: "Turn right onto Nathan Road and walk south towards iSQUARE.", chineseInstruction: "右轉入彌敦道向南行，往國際廣場方向。", direction: "walk_right", distance: 30, landmark: "Nathan Road" },
+          { step: 3, instruction: "Enter iSQUARE mall and take the passenger lift inside for step-free access.", chineseInstruction: "進入國際廣場，使用商場內的升降機。", direction: "enter_station", distance: 10, landmark: "iSQUARE Mall" },
+          { step: 4, instruction: "You have arrived at Exit H (iSQUARE) with mall lift access.", chineseInstruction: "已抵達H出口（國際廣場），備有商場升降機。", direction: "arrive", distance: 0, landmark: "Exit H Lift" }
+        ]
+      },
+      {
+        id: "tst-e-to-a1",
+        fromExit: "E",
+        fromDescription: "Exit E (Mody Road / Chatham Road South - Stairs only)",
+        toExit: "A1",
+        toDescription: "Exit A1 (Kowloon Park / Haiphong Road - Has Lift)",
+        toHasLift: true,
+        distance: 200,
+        waypoints: [
+          { step: 1, instruction: "From Exit E on Mody Road, walk west towards Nathan Road.", chineseInstruction: "從麼地道E出口向西行，往彌敦道方向。", direction: "walk_forward", distance: 100, landmark: "Mody Road" },
+          { step: 2, instruction: "Turn left onto Nathan Road and walk south towards Haiphong Road.", chineseInstruction: "左轉入彌敦道向南行，往海防道方向。", direction: "walk_left", distance: 70, landmark: "Nathan Road" },
+          { step: 3, instruction: "Turn right onto Haiphong Road and walk west towards Kowloon Park.", chineseInstruction: "右轉入海防道向西行，往九龍公園方向。", direction: "walk_right", distance: 25, landmark: "Haiphong Road" },
+          { step: 4, instruction: "Exit A1 entrance is on the right. Enter and use the lift.", chineseInstruction: "A1出口入口在右方，進入後使用升降機。", direction: "enter_station", distance: 5, landmark: "Exit A1 Entrance" },
+          { step: 5, instruction: "You have arrived at Exit A1 with lift access.", chineseInstruction: "已抵達A1出口，備有升降機設施。", direction: "arrive", distance: 0, landmark: "Exit A1 Lift" }
+        ]
+      }
     ]
   },
   {
@@ -1021,7 +1340,39 @@ export const MTR_STATIONS: MtrStation[] = [
         hasEscalatorToConcourse: true
       }
     ],
-    arRoutes: []
+    arRoutes: [],
+    externalRoutes: [
+      {
+        id: "ken-c-to-a",
+        fromExit: "C",
+        fromDescription: "Exit C (Forbes Street / Sai Ning Street - Stairs only)",
+        toExit: "A",
+        toDescription: "Exit A (Catchick Street / New Praya - Has Lift)",
+        toHasLift: true,
+        distance: 80,
+        waypoints: [
+          { step: 1, instruction: "From Exit C on Forbes Street, walk west along Forbes Street towards Catchick Street.", chineseInstruction: "從科士街C出口沿科士街向西行，往吉席街方向。", direction: "walk_forward", distance: 50, landmark: "Forbes Street" },
+          { step: 2, instruction: "Turn left onto Catchick Street. Exit A entrance is on the left side.", chineseInstruction: "左轉入吉席街，A出口入口在左方。", direction: "walk_left", distance: 25, landmark: "Catchick Street" },
+          { step: 3, instruction: "Enter Exit A and take the passenger lift for step-free access.", chineseInstruction: "進入A出口，乘搭升降機。", direction: "enter_station", distance: 5, landmark: "Exit A Entrance" },
+          { step: 4, instruction: "You have arrived at Exit A with lift access to the harbourfront.", chineseInstruction: "已抵達A出口，備有升降機前往海濱長廊。", direction: "arrive", distance: 0, landmark: "Exit A Lift" }
+        ]
+      },
+      {
+        id: "ken-c-to-b",
+        fromExit: "C",
+        fromDescription: "Exit C (Forbes Street / Sai Ning Street - Stairs only)",
+        toExit: "B",
+        toDescription: "Exit B (Victoria Road / Belcher's Bay - Has Lift)",
+        toHasLift: true,
+        distance: 100,
+        waypoints: [
+          { step: 1, instruction: "From Exit C on Forbes Street, walk north along Sai Ning Street towards Victoria Road.", chineseInstruction: "從科士街C出口沿西寧街向北行，往維多利亞道方向。", direction: "walk_forward", distance: 70, landmark: "Sai Ning Street" },
+          { step: 2, instruction: "Turn right onto Victoria Road. Exit B entrance is on the right.", chineseInstruction: "右轉入維多利亞道，B出口入口在右方。", direction: "walk_right", distance: 25, landmark: "Victoria Road" },
+          { step: 3, instruction: "Enter Exit B and take the passenger lift.", chineseInstruction: "進入B出口，乘搭升降機。", direction: "enter_station", distance: 5, landmark: "Exit B Entrance" },
+          { step: 4, instruction: "You have arrived at Exit B with lift access to Belcher's Bay Park.", chineseInstruction: "已抵達B出口，備有升降機前往卑路乍灣公園。", direction: "arrive", distance: 0, landmark: "Exit B Lift" }
+        ]
+      }
+    ]
   }
 ];
 

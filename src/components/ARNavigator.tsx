@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, Compass, ArrowUp, ArrowLeft, ArrowRight, Volume2, VolumeX, RotateCcw, ArrowUpRight, AlertCircle, CheckCircle2, Play, Pause, ChevronRight, Info, MapPin, Accessibility } from "lucide-react";
-import { MTR_STATIONS, ARRoute, ARWaypoint, MtrStation } from "../data/mtrData";
+import { Camera, Compass, ArrowRight, ArrowLeftRight, Volume2, VolumeX, RotateCcw, CheckCircle2, Play, Pause, ChevronRight, Info, MapPin, Accessibility, ExternalLink } from "lucide-react";
+import { MTR_STATIONS, ExternalARRoute, ExternalWaypoint, MtrStation } from "../data/mtrData";
 
 interface ARNavigatorProps {
   initialStationId?: string;
@@ -12,7 +12,7 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
   const [selectedStation, setSelectedStation] = useState<MtrStation>(
     MTR_STATIONS.find(s => s.id === initialStationId) || MTR_STATIONS[0]
   );
-  const [selectedRoute, setSelectedRoute] = useState<ARRoute | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<ExternalARRoute | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isLiveCamera, setIsLiveCamera] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -27,8 +27,8 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
   const walkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (selectedStation.arRoutes.length > 0) {
-      setSelectedRoute(selectedStation.arRoutes[0]);
+    if (selectedStation.externalRoutes.length > 0) {
+      setSelectedRoute(selectedStation.externalRoutes[0]);
     } else {
       setSelectedRoute(null);
     }
@@ -62,14 +62,15 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
       return () => clearTimeout(toPositioned);
     }
     if (localizationPhase === "positioned") {
-      const toNavigating = setTimeout(() => setLocalizationPhase("navigating"), 1500);
+      const toNavigating = setTimeout(() => setLocalizationPhase("navigating"), 3000);
       return () => clearTimeout(toNavigating);
     }
   }, [localizationPhase]);
 
   const speakInstruction = (text: string) => {
-    if (!voiceEnabled || !('speechSynthesis' in window)) return;
+    if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
+    if (!voiceEnabled) return;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = 1.0;
@@ -79,10 +80,12 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
   useEffect(() => {
     if (selectedRoute && selectedRoute.waypoints[currentStepIndex]) {
       const step = selectedRoute.waypoints[currentStepIndex];
-      speakInstruction(step.instruction);
       setSimulatedDistance(step.distance);
+      if (localizationPhase === "navigating") {
+        speakInstruction(step.instruction);
+      }
     }
-  }, [currentStepIndex, selectedRoute]);
+  }, [currentStepIndex, selectedRoute, localizationPhase]);
 
   const startCamera = async () => {
     setCameraError(null);
@@ -104,32 +107,10 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
     }
   };
 
-  useEffect(() => {
-    if (isWalking && selectedRoute) {
-      const activeStep = selectedRoute.waypoints[currentStepIndex];
-      if (activeStep.distance <= 0) { handleNextStep(); return; }
-
-      walkIntervalRef.current = setInterval(() => {
-        setSimulatedDistance(prev => {
-          if (prev <= 0.5) {
-            clearInterval(walkIntervalRef.current!);
-            setIsWalking(false);
-            handleNextStep();
-            return 0;
-          }
-          return Number((prev - 0.5).toFixed(1));
-        });
-      }, 150);
-    } else {
-      if (walkIntervalRef.current) clearInterval(walkIntervalRef.current);
-    }
-    return () => { if (walkIntervalRef.current) clearInterval(walkIntervalRef.current); };
-  }, [isWalking, currentStepIndex, selectedRoute]);
-
   const handleNextStep = () => {
-    if (!selectedRoute) return;
+    if (!selectedRoute || isRouteCompleted) return;
     if (currentStepIndex < selectedRoute.waypoints.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
+      setCurrentStepIndex(currentStepIndex + 1);
       setIsWalking(false);
     } else {
       setIsRouteCompleted(true);
@@ -138,44 +119,142 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
     }
   };
 
+  useEffect(() => {
+    if (!isWalking || !selectedRoute || isRouteCompleted) {
+      if (walkIntervalRef.current) { clearInterval(walkIntervalRef.current); walkIntervalRef.current = null; }
+      return;
+    }
+    const activeStep = selectedRoute.waypoints[currentStepIndex];
+    if (!activeStep) return;
+    if (activeStep.distance <= 0) {
+      setIsWalking(false);
+      handleNextStep();
+      return;
+    }
+    walkIntervalRef.current = setInterval(() => {
+      setSimulatedDistance(prev => {
+        const next = Number((prev - 0.5).toFixed(1));
+        return next <= 0 ? 0 : next;
+      });
+    }, 150);
+    return () => { if (walkIntervalRef.current) { clearInterval(walkIntervalRef.current); walkIntervalRef.current = null; } };
+  }, [isWalking, currentStepIndex, selectedRoute, isRouteCompleted]);
+
+  useEffect(() => {
+    if (isWalking && selectedRoute && !isRouteCompleted && simulatedDistance <= 0) {
+      const activeStep = selectedRoute.waypoints[currentStepIndex];
+      if (activeStep && activeStep.distance > 0) {
+        setIsWalking(false);
+        handleNextStep();
+      }
+    }
+  }, [simulatedDistance, isWalking]);
+
   const handleRestartRoute = () => {
     setCurrentStepIndex(0);
     setIsRouteCompleted(false);
     setIsWalking(false);
     setLocalizationPhase("localizing");
-    if (selectedRoute) setSimulatedDistance(selectedRoute.waypoints[0].distance);
+    if (selectedRoute && selectedRoute.waypoints.length > 0) setSimulatedDistance(selectedRoute.waypoints[0].distance);
   };
 
-  const activeWaypoint: ARWaypoint | null = selectedRoute && selectedRoute.waypoints[currentStepIndex]
+  const activeWaypoint: ExternalWaypoint | null = selectedRoute && selectedRoute.waypoints[currentStepIndex]
     ? selectedRoute.waypoints[currentStepIndex] : null;
 
   const renderDirectionIcon = (dir: string) => {
-    const size = 40;
-    switch (dir) {
-      case "forward": return <ArrowUp size={size} className="animate-pulse text-emerald-400" />;
-      case "left": return <ArrowLeft size={size} className="animate-bounce text-amber-400" />;
-      case "right": return <ArrowRight size={size} className="animate-bounce text-amber-400" />;
-      case "up_elevator": return (
-        <div className="flex flex-col items-center justify-center animate-pulse text-sky-400">
-          <span className="text-base font-bold mb-1">LIFT UP</span>
-          <div className="border border-sky-400 px-4 py-2 rounded bg-sky-950/80 font-bold text-xl flex items-center gap-1"><Accessibility size={20} /> ▲</div>
+    const isLeft = dir === "walk_left";
+    const isRight = dir === "walk_right";
+
+    if (dir === "cross_road") {
+      return (
+        <div className="flex flex-col items-center justify-center animate-pulse">
+          <div className="px-4 py-2 rounded-xl bg-amber-500/90 text-black font-black text-sm tracking-wider shadow-[0_0_20px_rgba(245,158,11,0.6)] flex items-center gap-2 border border-amber-300">
+            <ArrowLeftRight size={20} /> CROSS ROAD
+          </div>
         </div>
       );
-      case "down_elevator": return (
-        <div className="flex flex-col items-center justify-center animate-pulse text-sky-400">
-          <span className="text-base font-bold mb-1">LIFT DOWN</span>
-          <div className="border border-sky-400 px-4 py-2 rounded bg-sky-950/80 font-bold text-xl flex items-center gap-1"><Accessibility size={20} /> ▼</div>
-        </div>
-      );
-      case "up_escalator": return (
-        <div className="flex flex-col items-center justify-center text-indigo-400 animate-pulse">
-          <span className="text-base font-bold mb-1">ESCALATOR UP</span>
-          <ArrowUpRight size={size} />
-        </div>
-      );
-      case "arrive": return <CheckCircle2 size={size} className="text-emerald-400 animate-bounce" />;
-      default: return <Compass size={size} className="text-white animate-spin" />;
     }
+
+    if (dir === "enter_station") {
+      return (
+        <div className="flex flex-col items-center justify-center animate-bounce">
+          <div className="px-4 py-2 rounded-xl bg-sky-500/90 text-white font-black text-sm tracking-wider shadow-[0_0_20px_rgba(56,189,248,0.6)] flex items-center gap-2 border border-sky-300">
+            <ExternalLink size={20} /> ENTER STATION LIFT
+          </div>
+        </div>
+      );
+    }
+
+    if (dir === "arrive") {
+      return (
+        <div className="flex flex-col items-center justify-center animate-bounce">
+          <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.8)]">
+            <CheckCircle2 size={36} className="text-emerald-400" />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative flex items-center justify-center [perspective:800px] [transform-style:preserve-3d]">
+        {/* Ground Pulse Rings (Google Maps AR ground anchor) */}
+        <div className="absolute w-36 h-36 rounded-full border-2 border-sky-400/30 animate-ping [transform:rotateX(75deg)_translateZ(-20px)] pointer-events-none" />
+        <div className="absolute w-28 h-28 rounded-full bg-sky-500/10 [transform:rotateX(75deg)_translateZ(-20px)] blur-md pointer-events-none" />
+
+        {/* 3D Floating Arrow Body */}
+        <div
+          className="relative transition-transform duration-500 ease-out [transform-style:preserve-3d]"
+          style={{
+            transform: `rotateX(55deg) rotateZ(0deg)`,
+            animation: 'ar3DFloat 2.5s ease-in-out infinite'
+          }}
+        >
+          <svg width="110" height="110" viewBox="0 0 100 100" fill="none" className="drop-shadow-[0_12px_24px_rgba(0,0,0,0.8)]">
+            <defs>
+              <linearGradient id="googleArrowGrad" x1="50" y1="0" x2="50" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#38bdf8" />
+                <stop offset="50%" stopColor="#0284c7" />
+                <stop offset="100%" stopColor="#0369a1" />
+              </linearGradient>
+              <linearGradient id="bevelGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {isLeft ? (
+              // Left turn arrow — L-shape pointing left
+              <>
+                <path d="M 45 88 L 45 40 L 5 40 L 25 28 L 25 52 L 45 40 L 55 40 L 55 88 Z" fill="#082f49" transform="translate(0, 5)" />
+                <path d="M 45 88 L 45 40 L 5 40 L 25 28 L 25 52 L 45 40 L 55 40 L 55 88 Z" fill="url(#googleArrowGrad)" stroke="#7dd3fc" strokeWidth="2" />
+                <path d="M 45 88 L 45 40 L 5 40 L 25 28 Z" fill="url(#bevelGrad)" />
+              </>
+            ) : isRight ? (
+              // Right turn arrow — L-shape pointing right
+              <>
+                <path d="M 45 88 L 45 40 L 55 40 L 95 40 L 75 28 L 75 52 L 55 40 L 55 88 Z" fill="#082f49" transform="translate(0, 5)" />
+                <path d="M 45 88 L 45 40 L 55 40 L 95 40 L 75 28 L 75 52 L 55 40 L 55 88 Z" fill="url(#googleArrowGrad)" stroke="#7dd3fc" strokeWidth="2" />
+                <path d="M 45 88 L 45 40 L 55 40 L 95 40 L 75 28 Z" fill="url(#bevelGrad)" />
+              </>
+            ) : (
+              // Straight forward arrow
+              <>
+                <path d="M50 5 L90 85 L50 68 L10 85 Z" fill="#082f49" transform="translate(0, 6)" />
+                <path d="M50 5 L90 85 L50 68 L10 85 Z" fill="url(#googleArrowGrad)" stroke="#7dd3fc" strokeWidth="2" />
+                <path d="M50 5 L50 68 L10 85 Z" fill="url(#bevelGrad)" />
+              </>
+            )}
+          </svg>
+        </div>
+
+        <style>{`
+          @keyframes ar3DFloat {
+            0%, 100% { transform: rotateX(55deg) rotateZ(0deg) translateY(0px); }
+            50% { transform: rotateX(55deg) rotateZ(0deg) translateY(-12px); }
+          }
+        `}</style>
+      </div>
+    );
   };
 
   return (
@@ -205,37 +284,44 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
         </div>
 
         <div className="border-t border-zinc-200 pt-4">
-          <h3 className="text-base md:text-lg font-bold text-zinc-600 mb-3">2. Accessible Path</h3>
-          {selectedStation.arRoutes.length > 0 ? (
+          <h3 className="text-base md:text-lg font-bold text-zinc-600 mb-3">2. Find Lift Exit</h3>
+          {selectedStation.externalRoutes.length > 0 ? (
             <div className="flex flex-col gap-2">
-              {selectedStation.arRoutes.map((route) => (
-                <button key={route.id} onClick={() => setSelectedRoute(route)}
-                  className={`flex flex-col p-4 rounded-lg transition-all border text-left ${
-                    selectedRoute?.id === route.id
-                      ? "bg-white border-[#ac2e44] shadow-sm"
-                      : "bg-white border-zinc-200 hover:border-zinc-300"
-                  }`}>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="px-3 py-1 rounded text-sm font-semibold bg-[#ac2e44] text-white flex items-center gap-1"><Accessibility size={14} /> Accessible Path</span>
-                  </div>
-                  <div className="text-lg font-semibold text-zinc-900">{route.from}</div>
-                  <div className="text-base text-zinc-500 mt-1 flex items-center gap-1.5">
-                    <span>to</span>
-                    <span className="font-semibold text-[#ac2e44]">{route.to}</span>
-                  </div>
-                </button>
-              ))}
+              {selectedStation.externalRoutes.map((route) => {
+                const fromExitData = selectedStation.exits.find(e => e.name === route.fromExit);
+                return (
+                  <button key={route.id} onClick={() => setSelectedRoute(route)}
+                    className={`flex flex-col p-4 rounded-lg transition-all border text-left ${
+                      selectedRoute?.id === route.id
+                        ? "bg-white border-[#ac2e44] shadow-sm"
+                        : "bg-white border-zinc-200 hover:border-zinc-300"
+                    }`}>
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-600 text-white flex items-center gap-1"><Accessibility size={14} /> Lift Exit</span>
+                      <span className="text-sm text-zinc-500 font-medium">{route.distance}m walk</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <span className={`font-semibold ${fromExitData && !fromExitData.hasLift ? 'text-orange-600' : 'text-zinc-900'}`}>
+                        Exit {route.fromExit}
+                      </span>
+                      <ArrowRight size={16} className="text-zinc-400" />
+                      <span className="font-semibold text-[#ac2e44]">Exit {route.toExit}</span>
+                    </div>
+                    <div className="text-sm text-zinc-500 mt-1">{route.fromDescription.split('-')[0]?.trim()}</div>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="text-base text-zinc-400 italic p-4 text-center border border-dashed border-zinc-300 rounded-lg">
-              No AR routes mapped yet. Choose Central or Mong Kok.
+              All exits at this station have lifts available.
             </div>
           )}
         </div>
 
         {selectedRoute && (
           <div className="flex-1 border-t border-zinc-200 pt-4 overflow-y-auto max-h-[300px] pr-1">
-            <h4 className="text-base md:text-lg font-bold text-zinc-600 mb-3">Path Steps</h4>
+            <h4 className="text-base md:text-lg font-bold text-zinc-600 mb-3">Street Steps</h4>
             <div className="flex flex-col gap-2">
               {selectedRoute.waypoints.map((wp, index) => (
                 <div key={wp.step} onClick={() => setCurrentStepIndex(index)}
@@ -248,7 +334,7 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
                   }`}>
                   <div className="flex flex-col items-center">
                     <span className={`w-10 h-10 rounded flex items-center justify-center text-base font-bold ${
-                      index === currentStepIndex ? "bg-[#ac2e44] text-white" : index < currentStepIndex ? "bg-zinc-300 text-zinc-600" : "bg-zinc-100 text-zinc-500 border border-zinc-200"
+                      index === currentStepIndex ? "bg-blue-600 text-white" : index < currentStepIndex ? "bg-zinc-300 text-zinc-600" : "bg-zinc-100 text-zinc-500 border border-zinc-200"
                     }`}>{wp.step}</span>
                     {index < selectedRoute.waypoints.length - 1 && <div className="w-0.5 h-8 bg-zinc-200 my-1" />}
                   </div>
@@ -275,23 +361,30 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
                 {isLiveCamera ? "Live" : "Simulated"}
               </button>
 
-              <button onClick={() => setVoiceEnabled(!voiceEnabled)}
+              <button onClick={() => {
+                  const next = !voiceEnabled;
+                  setVoiceEnabled(next);
+                  if (!next && 'speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                  }
+                }}
                 className="p-2 md:p-3 rounded bg-zinc-900/90 text-zinc-200 hover:bg-zinc-800 border border-zinc-700 shadow-lg backdrop-blur-md flex items-center justify-center"
-                title={voiceEnabled ? "Mute Voice" : "Enable Voice"}>
+                title={voiceEnabled ? "Mute Voice" : "Enable Voice"}
+                aria-label={voiceEnabled ? "Mute Voice" : "Enable Voice"}>
                 {voiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
               </button>
             </div>
 
             <div className="hidden md:flex bg-zinc-900/95 backdrop-blur-md px-3 py-1.5 rounded text-sm font-semibold items-center gap-2 border border-zinc-700 shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-[#ac2e44] animate-ping" />
-              <span className="text-zinc-300">AR NAV</span>
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+              <span className="text-zinc-300">LIFT FINDER</span>
             </div>
           </div>
         </div>
 
         <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-zinc-950 min-h-[360px]">
           {isLiveCamera ? (
-            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover absolute inset-0" referrerPolicy="no-referrer" />
+            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover absolute inset-0" />
           ) : (
             <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden">
               <div className="absolute inset-0 opacity-15 pointer-events-none">
@@ -299,29 +392,14 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem]" />
               </div>
 
-              {localizationPhase === "navigating" && selectedRoute && !isRouteCompleted && (
-                <div className="relative z-10 flex flex-col items-center justify-center transition-transform duration-500 scale-100">
-                  <div className="absolute w-48 h-48 rounded-full border border-[#ac2e44]/30 animate-ping" />
-                  <div className="absolute w-36 h-36 rounded-full border border-[#ac2e44]/40 animate-[pulse_2s_infinite]" />
-                  <div className="absolute w-24 h-24 rounded bg-zinc-950 border-2 border-[#ac2e44] shadow-[0_0_25px_rgba(172,46,68,0.35)] flex items-center justify-center">
-                    <Compass size={28} className="text-[#ac2e44] animate-spin-slow" />
-                  </div>
-                  <div className="mt-32 bg-white text-zinc-900 p-5 rounded shadow-2xl border-l-8 border-[#ac2e44] min-w-[200px] max-w-[260px] pointer-events-none">
-                    <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Target</div>
-                    <div className="text-lg font-bold text-zinc-900">{activeWaypoint?.landmark || selectedRoute.to}</div>
-                    <div className="text-base text-zinc-600 font-medium">Step-Free Lift Path</div>
-                  </div>
-                </div>
-              )}
-
               {localizationPhase === "navigating" && isRouteCompleted && (
                 <div className="relative z-10 flex flex-col items-center justify-center bg-zinc-900 border-2 border-[#ac2e44] p-8 rounded-lg shadow-2xl max-w-sm text-center mx-4">
-                  <div className="w-20 h-20 bg-zinc-950 border-2 border-green-500 rounded-full flex items-center justify-center mb-4">
-                    <CheckCircle2 size={40} className="text-green-500 animate-pulse" />
+                  <div className="w-20 h-20 bg-zinc-950 border-2 border-blue-500 rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle2 size={40} className="text-blue-500 animate-pulse" />
                   </div>
-                  <h4 className="text-xl font-bold text-white mb-2">Destination Arrived!</h4>
+                  <h4 className="text-xl font-bold text-white mb-2">Lift Exit Reached!</h4>
                   <p className="text-lg text-zinc-300 mb-6 leading-relaxed">
-                    You have safely navigated to <strong className="text-[#ac2e44]">{selectedRoute?.to}</strong>.
+                    You have safely reached <strong className="text-[#ac2e44]">Exit {selectedRoute?.toExit}</strong> with step-free lift access.
                   </p>
                   <button onClick={handleRestartRoute}
                     className="flex items-center justify-center gap-2 px-8 py-3.5 rounded text-lg font-semibold bg-[#ac2e44] hover:bg-red-800 text-white transition-all shadow-md w-full">
@@ -344,8 +422,8 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
               </div>
               <div className="absolute w-52 h-52 rounded-full border border-[#ac2e44]/10 animate-ping pointer-events-none" />
               <div className="mt-6 text-center">
-                <p className="text-white text-lg md:text-xl font-semibold">Scanning station environment...</p>
-                <p className="text-zinc-400 text-base mt-1.5">Point camera at station signs or landmarks</p>
+                <p className="text-white text-lg md:text-xl font-semibold">Scanning street environment...</p>
+                <p className="text-zinc-400 text-base mt-1.5">Point camera at street signs or building numbers</p>
               </div>
               <style>{`@keyframes scanLine{0%,100%{top:8%}50%{top:88%}}`}</style>
             </div>
@@ -353,57 +431,70 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
 
           {localizationPhase === "positioned" && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
-              <div className="w-24 h-24 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center">
-                <CheckCircle2 size={48} className="text-green-500 animate-[bounce_0.5s_ease-in-out]" />
+              <div className="w-24 h-24 rounded-full bg-blue-500/20 border-2 border-blue-500 flex items-center justify-center">
+                <CheckCircle2 size={48} className="text-blue-500 animate-[bounce_0.5s_ease-in-out]" />
               </div>
               <p className="text-white text-xl md:text-2xl font-bold mt-4">Position locked!</p>
             </div>
           )}
 
           {localizationPhase === "navigating" && selectedRoute && !isRouteCompleted && (
-            <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
-              <div />
-              <div className="flex flex-col items-center justify-center my-auto">
-                <div className="w-28 h-28 md:w-32 md:h-32 rounded bg-zinc-950/90 border-2 border-zinc-700 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.6)] backdrop-blur-md">
+            <>
+              {/* Layer 1: Google AR Center Navigation HUD */}
+              <div className="absolute inset-x-0 top-12 bottom-28 pointer-events-none z-10 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-6">
+                  {/* 3D AR Arrow Component */}
                   {activeWaypoint && renderDirectionIcon(activeWaypoint.direction)}
-                </div>
-                <div className="mt-3 bg-zinc-950 border border-zinc-700 px-6 py-2.5 rounded flex items-center gap-2 shadow-xl backdrop-blur-md">
-                  <span className="text-base text-zinc-400 font-medium">Distance:</span>
-                  <span className="text-xl font-bold text-[#FFD700]">{simulatedDistance}m</span>
+
+                  {/* Compact Distance Badge Floating Below */}
+                  <div className="bg-zinc-950/90 border border-zinc-700/80 px-5 py-2 md:px-6 md:py-2.5 rounded-full flex items-center gap-2 shadow-[0_8px_20px_rgba(0,0,0,0.6)] backdrop-blur-md">
+                    <span className="text-xs md:text-sm text-zinc-400 font-medium uppercase tracking-wider">Distance</span>
+                    <span className="text-lg md:text-xl font-black text-[#FFD700]">{simulatedDistance}m</span>
+                  </div>
                 </div>
               </div>
 
-              {activeWaypoint?.direction.includes("escalator") && (
-                <div className="bg-zinc-950/95 border-l-4 border-amber-500 p-4 rounded-r-lg flex items-start gap-3 max-w-lg mx-auto shadow-lg backdrop-blur-sm mb-2">
-                  <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
-                  <div className="text-base text-zinc-300 leading-snug">
-                    <strong className="text-amber-500 block mb-0.5">ESCALATOR ALERT:</strong> This step involves an escalator. If you need assistance, request station staff help or take an alternative lift.
+              {/* Layer 2: Compact Bottom Info Sheet */}
+              <div className="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 z-20 w-[calc(100%-1.5rem)] max-w-md pointer-events-auto">
+                <div className="bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-xl p-4 md:p-5 shadow-xl">
+                  <div className="text-xs md:text-sm font-semibold text-zinc-400 uppercase tracking-wider">Target</div>
+                  <div className="text-base md:text-xl font-bold text-white mt-1">
+                    Exit {selectedRoute.toExit} (Lift)
+                  </div>
+                  <div className="text-sm md:text-base text-zinc-400 mt-1 truncate">
+                    Step-Free Street Path — No stairs or slopes
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            </>
           )}
         </div>
 
         {localizationPhase === "navigating" && selectedRoute && (
           <div className="bg-white border-t border-zinc-200 p-4 md:p-5 relative z-20">
             <div className="w-full h-3 bg-zinc-100 rounded-full overflow-hidden mb-4">
-              <div className="h-full bg-[#ac2e44] transition-all duration-300"
-                style={{ width: `${((currentStepIndex + 1) / selectedRoute.waypoints.length) * 100}%` }} />
+              <div className="h-full bg-blue-600 transition-all duration-300"
+                style={{ width: `${selectedRoute.waypoints.length > 0 ? ((currentStepIndex + 1) / selectedRoute.waypoints.length) * 100 : 0}%` }} />
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-base font-semibold text-white bg-[#ac2e44] px-4 py-1.5 rounded">
+                  <span className="text-base font-semibold text-white bg-blue-600 px-4 py-1.5 rounded">
                     Step {currentStepIndex + 1} of {selectedRoute.waypoints.length}
                   </span>
                   {activeWaypoint?.landmark && (
-                    <span className="text-base text-zinc-500 flex items-center gap-1"><MapPin size={16} /> {activeWaypoint.landmark}</span>
+                    <span className="text-base text-zinc-500 flex items-center gap-1">
+                      <MapPin size={16} /> {activeWaypoint.landmark}
+                    </span>
                   )}
                 </div>
-                <p className="text-lg md:text-xl font-bold text-zinc-900 leading-snug">{activeWaypoint?.instruction}</p>
-                <p className="text-base text-zinc-500 mt-1">{activeWaypoint?.chineseInstruction}</p>
+                <p className="text-lg md:text-xl font-bold text-zinc-900 leading-snug">
+                  {activeWaypoint?.instruction}
+                </p>
+                <p className="text-base text-zinc-500 mt-1">
+                  {activeWaypoint?.chineseInstruction}
+                </p>
               </div>
 
               <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
@@ -416,7 +507,7 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
                   <>
                     <button onClick={() => setIsWalking(!isWalking)}
                       className={`w-full md:w-auto px-6 py-3 text-base font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm ${
-                        isWalking ? "bg-amber-500 hover:bg-amber-400 text-zinc-900" : "bg-[#ac2e44] hover:bg-red-800 text-white"
+                        isWalking ? "bg-orange-500 hover:bg-orange-400 text-zinc-900" : "bg-[#ac2e44] hover:bg-red-800 text-white"
                       }`}>
                       {isWalking ? <><Pause size={18} /> Pause</> : <><Play size={18} /> Walk</>}
                     </button>
@@ -432,8 +523,8 @@ export default function ARNavigator({ initialStationId = "hku" }: ARNavigatorPro
         )}
 
         {cameraError && (
-          <div className="absolute top-24 left-4 right-4 bg-zinc-900/95 border border-amber-500/40 px-4 py-3 rounded flex items-center gap-3 z-30 text-base text-amber-200 shadow-xl backdrop-blur-md">
-            <Info size={18} className="text-amber-400 shrink-0" />
+          <div className="absolute top-24 left-4 right-4 bg-zinc-900/95 border border-orange-500/40 px-4 py-3 rounded flex items-center gap-3 z-30 text-base text-orange-200 shadow-xl backdrop-blur-md">
+            <Info size={18} className="text-orange-400 shrink-0" />
             <span>{cameraError}</span>
           </div>
         )}

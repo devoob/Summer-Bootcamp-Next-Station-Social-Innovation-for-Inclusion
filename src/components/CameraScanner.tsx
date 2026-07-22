@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Scan, Navigation, X, MapPin, Accessibility, ArrowRight, QrCode, Play } from "lucide-react";
+import { Scan, Navigation, X, MapPin, Accessibility, ArrowRight, QrCode, Play, ExternalLink, ChevronRight } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { findExitByBarcode, MTR_STATIONS, MtrExit, MtrStation } from "../data/mtrData";
+import { findExitByBarcode, MTR_STATIONS, MtrExit, MtrStation, ExternalARRoute } from "../data/mtrData";
 import ARNavigator from "./ARNavigator";
 
 interface ScanResult {
@@ -16,6 +16,7 @@ export default function CameraScanner() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [externalArMode, setExternalArMode] = useState<{ stationId: string; routeId: string } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -94,7 +95,8 @@ export default function CameraScanner() {
         const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/jpeg", 0.5));
         if (!blob) return;
 
-        const result = await decoderRef.current.scanFileV2(blob, false);
+        const file = new File([blob], "scan.jpeg", { type: "image/jpeg" });
+        const result = await decoderRef.current.scanFileV2(file, false);
         const match = findExitByBarcode(result.decodedText);
         if (match) {
           setScanResult(match);
@@ -190,7 +192,17 @@ export default function CameraScanner() {
       <div className="flex-1 min-h-0">
         {mode === "ar" ? (
           <div className="h-full overflow-y-auto">
-            <ARNavigator />
+            {externalArMode ? (
+              <div>
+                <button onClick={() => setExternalArMode(null)}
+                  className="flex items-center gap-2 text-blue-600 text-base font-semibold hover:underline py-2 px-1">
+                  <ChevronRight size={20} className="rotate-180" /> Back to Scanner
+                </button>
+                <ARNavigator initialStationId={externalArMode.stationId} />
+              </div>
+            ) : (
+              <ARNavigator />
+            )}
           </div>
         ) : (
           <div className="relative h-full bg-zinc-950 overflow-hidden">
@@ -198,7 +210,7 @@ export default function CameraScanner() {
             {scanError ? (
               <div className="absolute inset-0 flex items-center justify-center p-6">
                 <div className="text-center max-w-sm">
-                  <Scan size={48} className="text-amber-400 mx-auto mb-4" />
+                  <Scan size={48} className="text-orange-400 mx-auto mb-4" />
                   <p className="text-zinc-300 text-lg font-semibold mb-2">Camera unavailable</p>
                   <p className="text-zinc-400 text-base">{scanError}</p>
                   <button onClick={() => switchMode("ar")}
@@ -253,7 +265,7 @@ export default function CameraScanner() {
             {scanError && (
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 p-6">
                 <div className="text-center max-w-sm">
-                  <Scan size={48} className="text-amber-400 mx-auto mb-4" />
+                  <Scan size={48} className="text-orange-400 mx-auto mb-4" />
                   <p className="text-zinc-300 text-lg font-semibold mb-2">Camera unavailable</p>
                   <p className="text-zinc-400 text-base">{scanError}</p>
                   <div className="flex flex-col gap-2 mt-4">
@@ -297,16 +309,16 @@ export default function CameraScanner() {
                     </div>
 
                     {scanResult.exit.hasLift && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-                        <Accessibility size={18} className="text-green-600 shrink-0 mt-0.5" />
-                        <p className="text-sm text-green-800 font-medium">This exit has a passenger lift (step-free).</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+                        <Accessibility size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                        <p className="text-sm text-blue-800 font-medium">This exit has a passenger lift (step-free).</p>
                       </div>
                     )}
 
                     {!scanResult.exit.hasLift && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
-                        <Accessibility size={18} className="text-amber-600 shrink-0 mt-0.5" />
-                        <p className="text-sm text-amber-800 font-medium">No lift at this exit.</p>
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-start gap-2">
+                        <Accessibility size={18} className="text-orange-600 shrink-0 mt-0.5" />
+                        <p className="text-sm text-orange-800 font-medium">No lift at this exit.</p>
                       </div>
                     )}
 
@@ -330,8 +342,24 @@ export default function CameraScanner() {
                       </div>
                     )}
 
+                    {!scanResult.exit.hasLift && (() => {
+                      const matchingRoute = scanResult.station.externalRoutes.find(
+                        r => r.fromExit === scanResult.exit.name
+                      );
+                      return matchingRoute ? (
+                        <button onClick={() => setExternalArMode({ stationId: scanResult.station.id, routeId: matchingRoute.id })}
+                          className="w-full py-3 rounded-lg bg-blue-600 text-white text-base font-semibold hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                          <ExternalLink size={18} /> Navigate to Exit {matchingRoute.toExit} (Lift) — {matchingRoute.distance}m
+                        </button>
+                      ) : null;
+                    })()}
+
                     <button onClick={dismissResult}
-                      className="w-full py-3 rounded-lg bg-[#ac2e44] text-white text-base font-semibold hover:bg-red-800 transition-all">
+                      className={`w-full py-3 rounded-lg text-base font-semibold transition-all ${
+                        scanResult.exit.hasLift
+                          ? "bg-[#ac2e44] text-white hover:bg-red-800"
+                          : "bg-zinc-100 text-zinc-700 border border-zinc-200 hover:bg-zinc-200"
+                      }`}>
                       Scan Another Barcode
                     </button>
                   </div>
